@@ -36,17 +36,17 @@ response = openbank.get(
 transactions = response.json()['transactions']
 print('Got {} transactions'.format(len(transactions)))
 
-print('Get challenge request types: ')
+print('Get transaction request type: ')
 response = openbank.get('{}/transaction-request-types'.format(api_owner_url))
-challenge_type = response.json()[0]['value']
-print(challenge_type)
+request_type = response.json()[0]['value']
+print(request_type)
 
 
 print("Initiate transaction request:")
 headers = {'content-type': 'application/json'}
 
-uri = '{}/transaction-request-types/sandbox/transaction-requests'
-url = uri.format(api_owner_url)
+uri = '{}/transaction-request-types/{}/transaction-requests'
+url = uri.format(api_owner_url, request_type)
 body = json.dumps({
     'to': {
         'account_id': COUNTERPART_ACCOUNT_ID,
@@ -57,7 +57,7 @@ body = json.dumps({
         'amount': '1'
     },
     'description': 'Description abc',
-    'challenge_type': challenge_type,
+    'challenge_type': request_type,
 })
 response = openbank.post(url, data=body, headers=headers)
 request_response = response.json()
@@ -69,8 +69,8 @@ print('Challenge id is {}'.format(challenge_id))
 
 transaction_id = request_response['id']['value']
 print('Transaction id is {}'.format(transaction_id))
-uri = '{}/transaction-request-types/sandbox/transaction-requests/{}/challenge'
-url = uri.format(api_owner_url, transaction_id)
+uri = '{}/transaction-request-types/{}/transaction-requests/{}/challenge'
+url = uri.format(api_owner_url, request_type, transaction_id)
 body = json.dumps({
     'id': challenge_id,
     'answer': '123456',  # any number works in sandbox mode
